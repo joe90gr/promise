@@ -58,9 +58,9 @@ define([],function{
 	Promise.prototype.envoke = function(resultType, val, i){
 		var response = this[resultType]
 		if(resultType ==='fulfills'){
-			this.value = response[i](val);
+			this.value = response[i] ? response[i](val) : function(){};
 		} else {
-			this.reason =  response[i](val);
+			this.reason =  response[i] ? response[i](val) : function(){};
 		}
 	}
 
