@@ -48,14 +48,15 @@ define([],function{
 		var response = this[resultType]
 		if(i === null){
 			for(var i = 0; i < response.length; i++){
-				this.envoke(response, resultType, val, i);
+				this.envoke(resultType, val, i);
 			}
 		} else {
-			this.envoke(response, resultType, val, i);
+			this.envoke(resultType, val, i);
 		}
 	}
 
-	Promise.prototype.envoke = function(response, resultType, val, i){
+	Promise.prototype.envoke = function(resultType, val, i){
+		var response = this[resultType]
 		if(resultType ==='fulfills'){
 			this.value = response[i](val);
 		} else {
@@ -64,24 +65,18 @@ define([],function{
 	}
 
 	Promise.prototype.resolveRecursive = function(val, f) {
-
-		var successCB = function (res) {
+		f(val[this.i], function (res, response) {
 			var resolveIndex = val.length <= 1 ? null : this.i;
-			this.resolve(res, resolveIndex);
+			if(response === 'success'){
+				this.resolve(res, resolveIndex);
+			} else {
+				this.reject(res, resolveIndex);
+			}
+			
 			this.i++;
 			if(this.i >= val.length) { return }
 			this.resolveRecursive(val, f);
-		}.bind(this)
-
-		var failCB = function(res) {
-			var resolveIndex = val.length <= 1 ? null : this.i;
-			this.reject(res, resolveIndex);
-			this.i++;
-			if(this.i >= val.length) { return }
-			this.resolveRecursive(val, f);
-		}.bind(this)
-
-		f(val[this.i], successCB, failCB);
+		}.bind(this));
 	};
 
 });
